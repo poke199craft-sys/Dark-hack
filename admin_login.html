@@ -21,7 +21,7 @@
     <script>
         function login() {
             const password = document.getElementById('password').value;
-            if (password === "99999") {
+            if (password === "N") {
                 localStorage.setItem('adminLoggedIn', 'true');
                 window.location.href = "admin_panel.html";
             } else {
@@ -30,4 +30,5 @@
         }
     </script>
 </body>
+
 </html>
