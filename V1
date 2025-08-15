@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Admin Panel</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #111;
+      color: #fff;
+      margin: 0;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: rgba(0,0,0,0.7);
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid #0f0;
+      box-shadow: 0 0 15px rgba(0,255,0,0.3);
+    }
+    
+    h1 {
+      color: #0f0;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .control-panel {
+      margin-bottom: 30px;
+    }
+    
+    .control-group {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 8px;
+      border: 1px solid #333;
+    }
+    
+    .control-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #0f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+    
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #f00;
+      transition: .4s;
+      border-radius: 34px;
+    }
+    
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    
+    input:checked + .slider {
+      background-color: #0f0;
+    }
+    
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+    
+    .input-group {
+      margin-top: 15px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    
+    input[type="text"], input[type="url"] {
+      width: 100%;
+      padding: 8px;
+      background: #222;
+      border: 1px solid #0f0;
+      border-radius: 4px;
+      color: #fff;
+    }
+    
+    button {
+      background: #0f0;
+      color: #000;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    
+    button:hover {
+      background: #0c0;
+    }
+    
+    .status {
+      margin-top: 20px;
+      padding: 10px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 5px;
+      text-align: center;
+      display: none;
+    }
+    
+    .success {
+      color: #0f0;
+      border: 1px solid #0f0;
+    }
+    
+    .error {
+      color: #f00;
+      border: 1px solid #f00;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Admin Control Panel</h1>
+    
+    <div class="control-panel">
+      <div class="control-group">
+        <div class="control-title">
+          <span>System Status</span>
+          <label class="switch">
+            <input type="checkbox" id="systemToggle" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+        <p>Turn the system on/off for all users</p>
+      </div>
+      
+      <div class="control-group">
+        <div class="control-title">
+          <span>Login Requirement</span>
+          <label class="switch">
+            <input type="checkbox" id="loginToggle" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+        <p>When off, users won't need to login</p>
+      </div>
+      
+      <div class="control-group">
+        <div class="control-title">
+          <span>Show Webview</span>
+          <label class="switch">
+            <input type="checkbox" id="webviewToggle">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="input-group">
+          <label for="webviewUrl">Webview URL</label>
+          <input type="url" id="webviewUrl" placeholder="https://www.amarclub1.com/#/register?invitationCode=58473937685">
+        </div>
+        <p>Show webview popup to users (only once per session)</p>
+      </div>
+      
+      <div class="control-group">
+        <div class="control-title">
+          <span>Telegram Channel Link</span>
+        </div>
+        <div class="input-group">
+          <label for="telegramLink">Channel URL</label>
+          <input type="url" id="telegramLink" placeholder="https://t.me/yourchannel">
+        </div>
+        <button id="saveTelegram">Save Telegram Link</button>
+      </div>
+    </div>
+    
+    <div id="statusMessage" class="status"></div>
+    
+    <button id="saveSettings">Save All Settings</button>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAWs4V81fLFH6khFkHe0oJIbJeXuZs1DI4",
+      authDomain: "dark-tools-93abd.firebaseapp.com",
+      databaseURL: "https://dark-tools-93abd-default-rtdb.firebaseio.com",
+      projectId: "dark-tools-93abd",
+      storageBucket: "dark-tools-93abd.appspot.com",
+      messagingSenderId: "1003509016475",
+      appId: "1:1003509016475:android:826836719187aa12fc633e"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const systemStatusRef = database.ref('systemStatus');
+    const adminSettingsRef = database.ref('adminSettings');
+    const telegramLinkRef = database.ref('telegramLink');
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Load current settings
+      systemStatusRef.on('value', (snapshot) => {
+        document.getElementById('systemToggle').checked = snapshot.val() !== false;
+      });
+      
+      adminSettingsRef.on('value', (snapshot) => {
+        const settings = snapshot.val();
+        if (settings) {
+          document.getElementById('loginToggle').checked = settings.requireLogin !== false;
+          document.getElementById('webviewToggle').checked = settings.showWebview === true;
+          document.getElementById('webviewUrl').value = settings.webviewUrl || '';
+        }
+      });
+      
+      telegramLinkRef.on('value', (snapshot) => {
+        document.getElementById('telegramLink').value = snapshot.val() || '';
+      });
+      
+      // Save all settings
+      document.getElementById('saveSettings').addEventListener('click', () => {
+        const systemActive = document.getElementById('systemToggle').checked;
+        const requireLogin = document.getElementById('loginToggle').checked;
+        const showWebview = document.getElementById('webviewToggle').checked;
+        const webviewUrl = document.getElementById('webviewUrl').value;
+        
+        systemStatusRef.set(systemActive)
+          .then(() => {
+            return adminSettingsRef.set({
+              requireLogin,
+              showWebview,
+              webviewUrl
+            });
+          })
+          .then(() => {
+            showStatus('Settings saved successfully!', 'success');
+          })
+          .catch((error) => {
+            showStatus('Error saving settings: ' + error.message, 'error');
+          });
+      });
+      
+      // Save telegram link separately
+      document.getElementById('saveTelegram').addEventListener('click', () => {
+        const telegramLink = document.getElementById('telegramLink').value;
+        
+        telegramLinkRef.set(telegramLink)
+          .then(() => {
+            showStatus('Telegram link saved successfully!', 'success');
+          })
+          .catch((error) => {
+            showStatus('Error saving telegram link: ' + error.message, 'error');
+          });
+      });
+    });
+    
+    function showStatus(message, type) {
+      const statusElement = document.getElementById('statusMessage');
+      statusElement.textContent = message;
+      statusElement.className = 'status ' + type;
+      statusElement.style.display = 'block';
+      
+      setTimeout(() => {
+        statusElement.style.display = 'none';
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
