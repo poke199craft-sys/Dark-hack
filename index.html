@@ -180,6 +180,20 @@
       margin-top: 10px;
       color: #0f0;
     }
+    
+    .telegram-link {
+      margin-top: 15px;
+      font-size: 14px;
+    }
+    
+    .telegram-link a {
+      color: #0af;
+      text-decoration: none;
+    }
+    
+    .telegram-link a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
@@ -200,6 +214,10 @@
     
     <div class="db-status">
       Database Status: <span id="dbStatus">Loading...</span>
+    </div>
+    
+    <div class="telegram-link" id="telegramLinkContainer" style="display: none;">
+      Join our Telegram: <a href="#" id="telegramLink" target="_blank">@ChannelName</a>
     </div>
   </div>
 
@@ -226,12 +244,17 @@
     const systemStatusRef = database.ref('systemStatus');
     const keysRef = database.ref('O9');
     const adminSettingsRef = database.ref('adminSettings');
+    const telegramLinkRef = database.ref('telegramLink');
 
-    
+    var dataset1 = [];
+    var dataset2 = [];
+    var dataset3 = [];
+    var dataset4 = [];
     var systemActive = true;
     var lastIssueNumber = null;
     var webviewShown = false;
     var requireLogin = true;
+    var telegramLink = "";
 
     // Check admin settings on load
     adminSettingsRef.on('value', (snapshot) => {
@@ -243,6 +266,17 @@
         if (settings.showWebview && !webviewShown) {
           document.getElementById('webview').style.display = 'block';
           webviewShown = true;
+        }
+      }
+    });
+
+    // Load Telegram link
+    telegramLinkRef.on('value', (snapshot) => {
+      if (snapshot.exists()) {
+        telegramLink = snapshot.val();
+        if (telegramLink) {
+          document.getElementById('telegramLinkContainer').style.display = 'block';
+          document.getElementById('telegramLink').href = telegramLink;
         }
       }
     });
@@ -403,11 +437,8 @@
 
       const predictions = [prediction1, prediction2, prediction3, prediction4].filter(p => p !== "??");
       
-      // Only show black tick when all 4 databases agree
-      if (prediction1 === prediction2 && 
-          prediction2 === prediction3 && 
-          prediction3 === prediction4 && 
-          prediction1 !== "??") {
+      // Case 1: All 4 databases agree - 98% (Black tick with green check)
+      if (prediction1 === prediction2 && prediction2 === prediction3 && prediction3 === prediction4 && prediction1 !== "??") {
         resultBox.innerText = prediction1;
         const tickMark = document.createElement('div');
         tickMark.className = 'tick-mark';
@@ -418,9 +449,9 @@
         badge98.innerHTML = '98%';
         resultBox.appendChild(badge98);
       } 
-      // Show blue tick when 2 databases agree
-      else if (predictions.length >= 2 && new Set(predictions).size === 1) {
-        resultBox.innerText = predictions[0];
+      // Case 2: First 3 databases agree - 95% (Blue tick)
+      else if (prediction1 === prediction2 && prediction2 === prediction3 && prediction1 !== "??") {
+        resultBox.innerText = prediction1;
         const blueTick = document.createElement('div');
         blueTick.className = 'blue-tick';
         blueTick.innerHTML = '✓';
@@ -430,9 +461,9 @@
         badge95.innerHTML = '95%';
         resultBox.appendChild(badge95);
       }
-      // Show red indicator when 3 databases agree
-      else if (predictions.length >= 3 && new Set(predictions.slice(0,3)).size === 1) {
-        resultBox.innerText = predictions[0];
+      // Case 3: First 2 databases agree - 85% (Fire icon)
+      else if (prediction1 === prediction2 && prediction1 !== "??") {
+        resultBox.innerText = prediction1;
         const highChance = document.createElement('div');
         highChance.className = 'high-chance';
         highChance.innerHTML = '🔥';
@@ -442,9 +473,8 @@
         badge85.innerHTML = '85%';
         resultBox.appendChild(badge85);
       }
-      // Show normal display for other cases
+      // Default case: Show most common prediction without any indicator
       else {
-        // Find the most common prediction
         const predictionCounts = {};
         predictions.forEach(p => {
           predictionCounts[p] = (predictionCounts[p] || 0) + 1;
@@ -493,6 +523,15 @@
         } else {
           checkAccessKey(accessKey);
         }
+      } else {
+        // If login not required, just check if we need to show webview
+        adminSettingsRef.once('value').then((snapshot) => {
+          const settings = snapshot.val();
+          if (settings && settings.showWebview && !webviewShown) {
+            document.getElementById('webview').style.display = 'block';
+            webviewShown = true;
+          }
+        });
       }
     });
     
