@@ -227,10 +227,7 @@
     const keysRef = database.ref('O9');
     const adminSettingsRef = database.ref('adminSettings');
 
-    var dataset1 = [];
-    var dataset2 = [];
-    var dataset3 = [];
-    var dataset4 = [];
+    
     
     var systemActive = true;
     var lastIssueNumber = null;
@@ -389,19 +386,19 @@
 
       var countB1 = matchedNumbers1.filter(num => num >= 5 && num <= 9).length;
       var countS1 = matchedNumbers1.filter(num => num >= 0 && num <= 4).length;
-      var prediction1 = countB1 > countS1 ? "BIG" : countS1 > countB1 ? "SMALL" : "??";
+      var prediction1 = countB1 > countS1 ? "BIG" : countB1 > countS1 ? "SMALL" : "??";
 
       var countB2 = matchedNumbers2.filter(num => num >= 5 && num <= 9).length;
       var countS2 = matchedNumbers2.filter(num => num >= 0 && num <= 4).length;
-      var prediction2 = countB2 > countS2 ? "BIG" : countS2 > countB2 ? "SMALL" : "??";
+      var prediction2 = countB2 > countS2 ? "BIG" : countB2 > countS2 ? "SMALL" : "??";
 
       var countB3 = matchedNumbers3.filter(num => num >= 5 && num <= 9).length;
       var countS3 = matchedNumbers3.filter(num => num >= 0 && num <= 4).length;
-      var prediction3 = countB3 > countS3 ? "BIG" : countS3 > countB3 ? "SMALL" : "??";
+      var prediction3 = countB3 > countB3 ? "BIG" : countS3 > countS3 ? "SMALL" : "??";
       
       var countB4 = matchedNumbers4.filter(num => num >= 5 && num <= 9).length;
       var countS4 = matchedNumbers4.filter(num => num >= 0 && num <= 4).length;
-      var prediction4 = countB4 > countS4 ? "BIG" : countS4 > countB4 ? "SMALL" : "??";
+      var prediction4 = countB4 > countB4 ? "BIG" : countS4 > countB4 ? "SMALL" : "??";
 
       // Case 1: All 4 databases agree - Blue Tick + 98%
       if (prediction1 === prediction2 && prediction2 === prediction3 && prediction3 === prediction4 && prediction1 !== "??") {
