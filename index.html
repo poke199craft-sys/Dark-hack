@@ -418,28 +418,28 @@
         badge98.innerHTML = '98%';
         resultBox.appendChild(badge98);
       } 
-      // Show blue tick when 3 databases agree
-      else if (predictions.length >= 3 && new Set(predictions).size === 1) {
+      // Show blue tick when 2 databases agree
+      else if (predictions.length >= 2 && new Set(predictions).size === 1) {
         resultBox.innerText = predictions[0];
         const blueTick = document.createElement('div');
         blueTick.className = 'blue-tick';
-        blueTick.innerHTML = '✓';
+        blueTick.innerHTML = '🔥';
         resultBox.appendChild(blueTick);
         const badge95 = document.createElement('div');
         badge95.className = 'percentage-badge';
-        badge95.innerHTML = '95%';
+        badge95.innerHTML = '85%';
         resultBox.appendChild(badge95);
       }
-      // Show red indicator when 2 databases agree
-      else if (predictions.length >= 2 && new Set(predictions.slice(0,3)).size === 1) {
+      // Show red indicator when 3 databases agree
+      else if (predictions.length >= 3 && new Set(predictions.slice(0,3)).size === 1) {
         resultBox.innerText = predictions[0];
         const highChance = document.createElement('div');
         highChance.className = 'high-chance';
-        highChance.innerHTML = '🔥';
+        highChance.innerHTML = '✔';
         resultBox.appendChild(highChance);
         const badge85 = document.createElement('div');
         badge85.className = 'percentage-badge';
-        badge85.innerHTML = '85%';
+        badge85.innerHTML = '95%';
         resultBox.appendChild(badge85);
       }
       // Show normal display for other cases
@@ -528,3 +528,4 @@
   </script>
 </body>
 </html> 
+
