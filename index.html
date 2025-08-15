@@ -237,13 +237,11 @@
     var webviewShown = false;
     var requireLogin = true;
 
-    // Check admin settings on load
     adminSettingsRef.on('value', (snapshot) => {
       const settings = snapshot.val();
       if (settings) {
         requireLogin = settings.requireLogin !== false;
         
-        // Show webview if enabled and not shown before
         if (settings.showWebview && !webviewShown) {
           document.getElementById('webview').style.display = 'block';
           webviewShown = true;
@@ -405,21 +403,19 @@
       var countS4 = matchedNumbers4.filter(num => num >= 0 && num <= 4).length;
       var prediction4 = countB4 > countS4 ? "BIG" : countS4 > countB4 ? "SMALL" : "??";
 
-      const predictions = [prediction1, prediction2, prediction3, prediction4].filter(p => p !== "??");
-      
-      // Case 1: All 4 databases agree - 98%
+      // Case 1: All 4 databases agree - Blue Tick + 98%
       if (prediction1 === prediction2 && prediction2 === prediction3 && prediction3 === prediction4 && prediction1 !== "??") {
         resultBox.innerText = prediction1;
-        const tickMark = document.createElement('div');
-        tickMark.className = 'tick-mark';
-        tickMark.innerHTML = '✓';
-        resultBox.appendChild(tickMark);
+        const blueTick = document.createElement('div');
+        blueTick.className = 'blue-tick';
+        blueTick.innerHTML = '✓';
+        resultBox.appendChild(blueTick);
         const badge98 = document.createElement('div');
         badge98.className = 'percentage-badge';
         badge98.innerHTML = '98%';
         resultBox.appendChild(badge98);
       } 
-      // Case 2: First 3 databases agree - 95%
+      // Case 2: First 3 databases agree - Green Tick + 95%
       else if (prediction1 === prediction2 && prediction2 === prediction3 && prediction1 !== "??") {
         resultBox.innerText = prediction1;
         const tickMark = document.createElement('div');
@@ -431,7 +427,7 @@
         badge95.innerHTML = '95%';
         resultBox.appendChild(badge95);
       }
-      // Case 3: First 2 databases agree - 85%
+      // Case 3: First 2 databases agree - Fire + 85%
       else if (prediction1 === prediction2 && prediction1 !== "??") {
         resultBox.innerText = prediction1;
         const highChance = document.createElement('div');
@@ -443,23 +439,13 @@
         badge85.innerHTML = '85%';
         resultBox.appendChild(badge85);
       }
-      // Default case: Show most common prediction without any indicator
+      // Case 4: Only 1st database has prediction - Show without indicator
+      else if (prediction1 !== "??") {
+        resultBox.innerText = prediction1;
+      }
+      // Default case: No match
       else {
-        const predictionCounts = {};
-        predictions.forEach(p => {
-          predictionCounts[p] = (predictionCounts[p] || 0) + 1;
-        });
-        
-        let mostCommonPrediction = "??";
-        let maxCount = 0;
-        for (const [pred, count] of Object.entries(predictionCounts)) {
-          if (count > maxCount) {
-            mostCommonPrediction = pred;
-            maxCount = count;
-          }
-        }
-        
-        resultBox.innerText = mostCommonPrediction;
+        resultBox.innerText = "??";
       }
     }
 
