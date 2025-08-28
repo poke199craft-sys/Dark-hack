@@ -1,1 +1,944 @@
-🖕🖕🖕🖕🖕🖕🖕🖕🖕🖕
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title></title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Outfit', sans-serif; background:#000; color:#fff; margin:0; padding:10px; text-align:center;}
+    .header { font-size:20px; font-weight:bold; color:#00ffea; margin-bottom:10px;}
+    .card { background:#111; border:1px solid #00ffea; border-radius:10px; padding:10px; margin-bottom:12px;}
+    .prediction-btn { 
+      margin:10px auto; display:block; background:#00ffea33; color:#00ffea; border:1px solid #00ffea;
+      border-radius:8px; padding:12px; font-weight:bold; font-size:18px;
+      /* Make prediction box invisible */
+      opacity: 0;
+      height: 0;
+      padding: 0;
+      border: none;
+      margin: 0;
+      overflow: hidden;
+    }
+    .history-container { border:1px solid #00ffea; border-radius:8px; overflow:hidden;}
+    table { width:100%; border-collapse:collapse;}
+    th,td { font-size:13px; border-bottom:1px solid #222; padding:6px;}
+    th { background:#111; color:#00ffea;}
+    .dot { width:10px; height:10px; border-radius:50%; display:inline-block;}
+    .dot.red { background:red;} .dot.green { background:lime;} .dot.violet { background:violet;}
+    .num.red { color:red; font-weight:bold;} .num.green { color:lime; font-weight:bold;} .num.violet { color:violet; font-weight:bold;}
+
+    /* নতুন বাটন ডিজাইন */
+    .button-panel { margin:15px 0; }
+    .button-row { display:flex; justify-content:center; gap:10px; margin:5px 0; }
+    .btn { flex:1; min-width:60px; padding:12px; font-weight:bold; border:none; border-radius:8px; cursor:pointer; font-size:16px;}
+    .btn-green { background:#00b050; color:#fff; }
+    .btn-red { background:#d90000; color:#fff; }
+    .btn-violet { background:#6f42c1; color:#fff; }
+    .btn-dark { background:#222; color:#fff; }
+    
+    /* Purchase Widget Styles */
+    .purchase-widget { 
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 360px;
+      height: 360px;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 8px 24px rgba(16,23,53,.12);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid #eef0f4;
+      z-index: 1000;
+      display: none;
+    }
+    .widget-header { 
+      background: linear-gradient(180deg, #ffa94d, #ffb86b); 
+      color: #fff; 
+      padding: 18px 16px 28px; 
+      position: relative; 
+      text-align: center; 
+    }
+    .widget-header-title { 
+      background: #fff; 
+      color: #222; 
+      padding: 8px 14px; 
+      border-radius: 14px; 
+      display: inline-block; 
+      font-weight: 700; 
+    }
+    .widget-body { 
+      padding: 12px 14px; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 12px; 
+      overflow: auto; 
+      flex: 1;
+    }
+    .widget-footer { 
+      margin-top: auto; 
+      display: flex; 
+      align-items: center; 
+    }
+    .widget-cancel { 
+      flex: 0 0 35%; 
+      background: #eef0f4; 
+      color: #445; 
+      font-weight: 800; 
+      border: 0; 
+      padding: 14px 10px; 
+      cursor:pointer;
+    }
+    .widget-confirm { 
+      flex: 1; 
+      background: #ffa94d; 
+      color: #fff; 
+      font-weight: 900; 
+      border: 0; 
+      padding: 14px 10px; 
+      text-align: center; 
+      cursor:pointer;
+    }
+    .widget-total { 
+      font-weight: 800; 
+    }
+    .widget-pills { 
+      display: flex; 
+      gap: 8px; 
+      flex-wrap: wrap; 
+    }
+    .widget-pill { 
+      cursor: pointer; 
+      border: 0; 
+      border-radius: 10px; 
+      background: #eef0f4; 
+      padding: 10px 12px; 
+      font-weight: 700; 
+      color: #334; 
+    }
+    .widget-pill.active { 
+      background: #ffa94d; 
+      color: #fff; 
+    }
+    .widget-qty-controls { 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
+    }
+    .widget-qty-btn { 
+      cursor: pointer; 
+      width: 40px; 
+      height: 40px; 
+      display: grid; 
+      place-items: center; 
+      background: #ffb86b; 
+      color: #fff; 
+      border: 0; 
+      border-radius: 10px; 
+      font-weight: 700; 
+    }
+    .widget-qty-display { 
+      min-width: 62px; 
+      text-align: center; 
+      padding: 10px 12px; 
+      background: #f1f3f7; 
+      border-radius: 10px; 
+      font-weight: 800; 
+    }
+    .widget-agree { 
+      display: flex; 
+      align-items: center; 
+      gap: 10px; 
+      font-size: 14px; 
+      color: #2b2f42; 
+    }
+    .widget-agree .dot { 
+      width: 22px; 
+      height: 22px; 
+      border-radius: 50%; 
+      border: 2px solid #c9d1e1; 
+      display: grid; 
+      place-items: center; 
+    }
+    .widget-agree input { 
+      display: none; 
+    }
+    .widget-agree input:checked + .dot { 
+      border-color: #2ecc71; 
+      background: radial-gradient(circle at center, #2ecc71 60%, transparent 61%); 
+    }
+    .widget-agree a { 
+      color: #ff6b6b; 
+      text-decoration: none; 
+      font-weight: 700; 
+    }
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 999;
+      display: none;
+    }
+    .subtle { 
+      opacity: .7; 
+      font-weight: 600; 
+    }
+    h4 { 
+      color: #101735; 
+      margin: 0 0 6px; 
+      font-size: 14px; 
+      letter-spacing: .2px; 
+    }
+    
+    /* Coin System Styles */
+    .coin-system {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin: 10px 0;
+    }
+    .coin-display {
+      background: #222;
+      border: 1px solid #00ffea;
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-weight: bold;
+      color: #00ffea;
+    }
+    .bet-btn {
+      background: #ffa94d;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .bet-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    /* Result Notification */
+    .result-notification {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 15px 25px;
+      border-radius: 8px;
+      font-weight: bold;
+      z-index: 1001;
+      display: none;
+    }
+    .win-notification {
+      background: #00b050;
+      color: white;
+    }
+    .loss-notification {
+      background: #d90000;
+      color: white;
+    }
+    
+    /* Betting Timer */
+    .betting-timer {
+      font-size: 14px;
+      color: #ffa94d;
+      margin-top: 5px;
+    }
+    
+    /* Bet History */
+    .bet-history {
+      margin-top: 15px;
+      padding: 10px;
+      background: #111;
+      border: 1px solid #00ffea;
+      border-radius: 10px;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+    .bet-history h3 {
+      margin: 0 0 8px 0;
+      color: #00ffea;
+      font-size: 14px;
+    }
+    .bet-history-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      padding: 4px 0;
+      border-bottom: 1px solid #222;
+    }
+    .bet-win {
+      color: #00b050;
+    }
+    .bet-loss {
+      color: #d90000;
+    }
+    
+    /* Timer Styles */
+    .timer-container {
+      margin: 15px 0;
+      padding: 10px;
+      background: #111;
+      border: 1px solid #00ffea;
+      border-radius: 10px;
+    }
+    .timer-display {
+      font-size: 24px;
+      font-weight: bold;
+      color: #ffa94d;
+      margin: 5px 0;
+    }
+    .timer-label {
+      font-size: 14px;
+      color: #00ffea;
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header"></div>
+  
+  <div class="result-notification" id="resultNotification"></div>
+  
+  <!-- Timer Display -->
+  <div class="timer-container">
+    <div class="timer-label">Next Result In:</div>
+    <div class="timer-display" id="marketTimer">01:00</div>
+    <div class="timer-label" id="timerStatus">Market Open - Place Your Bets</div>
+  </div>
+  
+  <div class="card">
+    <div id="currentPeriod">Current Period: Loading...</div>
+    <div id="bettingTimer" class="betting-timer">Betting closes in: --</div>
+    <div class="coin-system">
+      <div class="coin-display">Coins: <span id="coinBalance">100</span></div>
+      <button class="bet-btn" id="placeBetBtn">Place Bet (30 Coins)</button>
+    </div>
+    <!-- Prediction box is now invisible -->
+    <div id="predictionBox" class="prediction-btn">Click "Place Bet" to start prediction</div>
+  </div>
+
+  <!-- নতুন বাটন প্যানেল -->
+  <div class="button-panel">
+    <div class="button-row">
+      <button class="btn btn-green" data-type="color" data-value="Green">Green</button>
+      <button class="btn btn-violet" data-type="color" data-value="Violet">Violet</button>
+      <button class="btn btn-red" data-type="color" data-value="Red">Red</button>
+    </div>
+    <div class="button-row">
+      <button class="btn btn-dark" data-type="number" data-value="0">0</button>
+      <button class="btn btn-dark" data-type="number" data-value="1">1</button>
+      <button class="btn btn-dark" data-type="number" data-value="2">2</button>
+      <button class="btn btn-dark" data-type="number" data-value="3">3</button>
+      <button class="btn btn-dark" data-type="number" data-value="4">4</button>
+    </div>
+    <div class="button-row">
+      <button class="btn btn-dark" data-type="number" data-value="5">5</button>
+      <button class="btn btn-dark" data-type="number" data-value="6">6</button>
+      <button class="btn btn-dark" data-type="number" data-value="7">7</button>
+      <button class="btn btn-dark" data-type="number" data-value="8">8</button>
+      <button class="btn btn-dark" data-type="number" data-value="9">9</button>
+    </div>
+    <div class="button-row">
+      <button class="btn btn-dark" data-type="size" data-value="Big">Big</button>
+      <button class="btn btn-dark" data-type="size" data-value="Small">Small</button>
+    </div>
+  </div>
+  
+  <div class="bet-history">
+    <h3>Recent Bets</h3>
+    <div id="betHistoryList"></div>
+  </div>
+  
+  <div class="history-container">
+    <table>
+      <thead id="tableHead"></thead>
+      <tbody id="tableBody"><tr><td>Loading...</td></tr></tbody>
+    </table>
+  </div>
+
+  <!-- Purchase Widget -->
+  <div class="overlay" id="overlay"></div>
+  <div class="purchase-widget" id="purchaseWidget">
+    <div class="widget-header">
+      <div class="widget-header-title" id="widgetTitle">Select Big</div>
+    </div>
+    <div class="widget-body">
+      <!-- Balance / Unit price -->
+      <div>
+        <h4>Balance</h4>
+        <div class="widget-pills" id="pricePills">
+          <button class="widget-pill active" data-price="1">1</button>
+          <button class="widget-pill" data-price="10">10</button>
+          <button class="widget-pill" data-price="100">100</button>
+          <button class="widget-pill" data-price="1000">1000</button>
+        </div>
+      </div>
+
+      <!-- Quantity -->
+      <div>
+        <h4>Quantity</h4>
+        <div class="widget-qty-controls">
+          <button class="widget-qty-btn" id="minus">−</button>
+          <div class="widget-qty-display" id="qty">1</div>
+          <button class="widget-qty-btn" id="plus">＋</button>
+        </div>
+        <div class="widget-pills" style="margin-top:8px" id="qtyPills">
+          <button class="widget-pill active" data-q="1">X1</button>
+          <button class="widget-pill" data-q="5">X5</button>
+          <button class="widget-pill" data-q="10">X10</button>
+          <button class="widget-pill" data-q="20">X20</button>
+          <button class="widget-pill" data-q="50">X50</button>
+          <button class="widget-pill" data-q="100">X100</button>
+        </div>
+      </div>
+
+      <!-- Terms -->
+      <label class="widget-agree">
+        <input type="checkbox" id="agree" checked>
+        <span class="dot"></span>
+        <span>আমি সম্মত <a href="#">《Pre-sale rules》</a></span>
+      </label>
+    </div>
+
+    <div class="widget-footer">
+      <button class="widget-cancel" id="cancel">Cancel</button>
+      <button class="widget-confirm" id="confirm"><span class="subtle">Total amount</span> <span class="widget-total" id="total">৳1.00</span></button>
+    </div>
+  </div>
+
+<script>
+const CURRENT_API = 'https://api.bdg88zf.com/api/webapi/GetGameIssue';
+const HISTORY_API = 'https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json';
+
+const REQUEST_DATA = {
+  typeId:1, language:0,
+  random:"e7fe6c090da2495ab8290dac551ef1ed",
+  signature:"1F390E2B2D8A55D693E57FD905AE73A7",
+  timestamp:1723726679
+};
+
+let mode="size"; // "size" or "color"
+let predictionHistory=[];
+let selectedBetType = "";
+let selectedBetValue = "";
+let coins = 100; // Initial coins
+let currentBet = null;
+let isBetPlaced = false;
+let currentPrediction = null;
+let lastProcessedPeriod = null;
+let bettingEndTime = null;
+let betHistory = [];
+let countdownInterval = null;
+let marketTimerInterval = null;
+let marketTimerSeconds = 60; // 1 minute market timer
+
+function getBigSmall(num){ return num>=5?"Big":"Small";}
+function getColor(num){
+  if([1,3,7,9].includes(num)) return "Green";
+  if([2,4,6,8].includes(num)) return "Red";
+  return "Violet";
+}
+
+// Get odds based on bet type
+function getOdds(type, value) {
+  if (type === "number") {
+    // Number bets pay 9x
+    return 9;
+  } else if (type === "color") {
+    // Color bets pay 2x (Red/Green) or 4.5x (Violet)
+    return value === "Violet" ? 4.5 : 2;
+  } else if (type === "size") {
+    // Size bets pay 1.96x
+    return 1.96;
+  }
+  return 1;
+}
+
+/**
+ * NEW PREDICTION LOGIC V.3
+ * Analyzes more patterns and displays the pattern name.
+ */
+function predict(history) {
+    const data = history.slice(0, 8).map(h => (mode === "size" ? h.size : h.color));
+
+    if (data.length < 8) {
+        return { text: "Analyzing Patterns...", conf: "--", pattern: "Awaiting data" };
+    }
+    
+    // নতুন প্যাটার্ন: ৬ সংখ্যার পুনরাবৃত্তি (ABCABC Pattern)
+    // উদাহরণ: Big, Small, Big, Big, Small, Big -> Predicts Big
+    if (data[0] === data[3] && data[1] === data[4] && data[2] === data[5] && (data[0] !== data[1] || data[1] !== data[2])) {
+        return { text: data[0], conf: 96, pattern: "Repeating Sequence (ABCABC)" };
+    }
+
+    // আগের প্যাটার্ন: ট্রিপল স্ট্রিক (AAA Pattern)
+    // উদাহরণ: Big, Big, Big -> Predicts Big
+    if (data[0] === data[1] && data[1] === data[2]) {
+        return { text: data[0], conf: 95, pattern: "Triple Streak (AAA)" };
+    }
+    
+    // নতুন প্যাটার্ন: একা এবং ট্রিপল (ABBB Pattern)
+    // উদাহরণ: Big, Small, Small, Small -> Predicts Small
+    if (data[0] !== data[1] && data[1] === data[2] && data[2] === data[3]) {
+        return { text: data[1], conf: 93, pattern: "Single with Triple (ABBB)" };
+    }
+
+    // আগের প্যাটার্ন: অল্টারনেটিং (ABAB Pattern)
+    // উদাহরণ: Big, Small, Big, Small -> Predicts Big
+    if (data[0] === data[2] && data[1] === data[3] && data[0] !== data[1]) {
+        return { text: data[0], conf: 92, pattern: "Alternating (ABAB)" };
+    }
+
+    // আগের প্যাটার্ন: ডাবল (AABB Pattern)
+    // উদাহরণ: Big, Big, Small, Small -> Predicts Big
+    if (data[0] === data[1] && data[2] === data[3] && data[0] !== data[2]) {
+        return { text: data[0], conf: 90, pattern: "Double (AABB)" };
+    }
+    
+    // নতুন প্যাটার্ন: মিরর (ABBA Pattern)
+    // উদাহরণ: Big, Small, Small, Big -> Predicts Big
+    if (data[0] === data[3] && data[1] === data[2] && data[0] !== data[1]) {
+        return { text: data[0], conf: 89, pattern: "Mirror (ABBA)" };
+    }
+
+    // আগের প্যাটার্ন: টু-ওয়ান-টু (AABAA Pattern)
+    // উদাহরণ: Big, Big, Small, Big, Big -> Predicts Small
+    if (data[0] === data[1] && data[2] !== data[0] && data[3] === data[0] && data[4] === data[0]) {
+        return { text: data[2], conf: 88, pattern: "Two-One-Two (AABAA)" };
+    }
+
+    // --- ফলব্যাক নিয়ম ---
+    // যদি কোনো বিশেষ প্যাটার্ন খুঁজে না পাওয়া যায়
+    const counts = data.slice(0, 5).reduce((acc, val) => {
+        acc[val] = (acc[val] || 0) + 1;
+        return acc;
+    }, {});
+
+    let mostFrequent = "Big";
+    if (Object.keys(counts).length > 0) {
+        mostFrequent = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+    }
+    
+    if (mode === "size") {
+        const prediction = mostFrequent === "Big" ? "Small" : "Big";
+        return { text: prediction, conf: 75, pattern: "Fallback Rule" };
+    } else {
+        let prediction = "Red";
+        if (mostFrequent === "Red") prediction = "Green";
+        if (mostFrequent === "Green") prediction = "Red";
+        return { text: prediction, conf: 70, pattern: "Fallback Rule" };
+    }
+}
+
+function showResultNotification(message, isWin) {
+  const notification = document.getElementById('resultNotification');
+  notification.textContent = message;
+  notification.className = isWin ? 'result-notification win-notification' : 'result-notification loss-notification';
+  notification.style.display = 'block';
+  
+  setTimeout(() => {
+    notification.style.display = 'none';
+  }, 3000);
+}
+
+function updateBettingTimer() {
+  if (!bettingEndTime) return;
+  
+  const now = new Date().getTime();
+  const timeLeft = bettingEndTime - now;
+  
+  if (timeLeft <= 0) {
+    document.getElementById("bettingTimer").textContent = "Betting closed";
+    document.getElementById("placeBetBtn").disabled = true;
+    clearInterval(countdownInterval);
+    return;
+  }
+  
+  const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+  document.getElementById("bettingTimer").textContent = `Betting closes in: ${seconds}s`;
+}
+
+function updateMarketTimer() {
+  const timerDisplay = document.getElementById("marketTimer");
+  const timerStatus = document.getElementById("timerStatus");
+  
+  if (marketTimerSeconds <= 0) {
+    // Timer completed, reset to 60 seconds
+    marketTimerSeconds = 60;
+    timerStatus.textContent = "New Round Starting...";
+    
+    // Simulate result calculation
+    setTimeout(() => {
+      timerStatus.textContent = "Market Open - Place Your Bets";
+      startBettingTimer();
+    }, 2000);
+  }
+  
+  const minutes = Math.floor(marketTimerSeconds / 60);
+  const seconds = marketTimerSeconds % 60;
+  timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  
+  marketTimerSeconds--;
+}
+
+function startBettingTimer() {
+  // Set betting end time to 30 seconds from now
+  bettingEndTime = new Date().getTime() + 30000;
+  
+  // Clear any existing interval
+  if (countdownInterval) clearInterval(countdownInterval);
+  
+  // Update timer immediately and set interval
+  updateBettingTimer();
+  countdownInterval = setInterval(updateBettingTimer, 1000);
+}
+
+function updateBetHistory() {
+  const historyList = document.getElementById("betHistoryList");
+  historyList.innerHTML = "";
+  
+  // Show last 5 bets
+  const recentBets = betHistory.slice(-5);
+  
+  recentBets.forEach(bet => {
+    const item = document.createElement("div");
+    item.className = "bet-history-item";
+    
+    const resultClass = bet.win ? "bet-win" : "bet-loss";
+    const resultText = bet.win ? `+${bet.winAmount}` : `-${bet.amount}`;
+    
+    item.innerHTML = `
+      <span>${bet.type}: ${bet.value}</span>
+      <span class="${resultClass}">${resultText} coins</span>
+    `;
+    
+    historyList.appendChild(item);
+  });
+}
+
+async function fetchData(){
+  try{
+    const periodRes=await fetch(CURRENT_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(REQUEST_DATA)});
+    const periodData=await periodRes.json();
+    const period=periodData?.data?.issueNumber||"Unavailable";
+    document.getElementById("currentPeriod").innerText=`Current Period: ${period}`;
+
+    const res=await fetch(HISTORY_API+'?ts='+Date.now());
+    const data=await res.json();
+    const history=data.data.list.slice(0,20).map(item=>{
+      const num=parseInt(item.number);
+      return {period:item.issueNumber, number:num, size:getBigSmall(num), color:getColor(num)};
+    });
+
+    // Update prediction if bet is placed
+    if (isBetPlaced) {
+      currentPrediction = predict(history);
+      // Prediction box is now invisible, but we still calculate internally
+      document.getElementById("predictionBox").innerHTML = `
+        Prediction: ${currentPrediction.text}<br>
+        Confidence: ${currentPrediction.conf}%<br>
+        Pattern: ${currentPrediction.pattern}
+      `;
+      
+      // Check if the current period has a result and we haven't processed it yet
+      const currentResult = history.find(h => h.period === period);
+      if (currentResult && period !== lastProcessedPeriod) {
+        lastProcessedPeriod = period;
+        
+        if (currentBet) {
+          const actualValue = currentBet.type === "size" ? currentResult.size : 
+                             currentBet.type === "color" ? currentResult.color : 
+                             currentResult.number.toString();
+          
+          const isWin = currentBet.value === actualValue;
+          
+          if (isWin) {
+            // Win - add coins based on bet amount and odds
+            const winAmount = Math.floor(currentBet.amount * currentBet.odds);
+            coins += winAmount;
+            showResultNotification(`Congratulations! You won ${winAmount} coins!`, true);
+            
+            // Add to bet history
+            betHistory.push({
+              type: currentBet.type,
+              value: currentBet.value,
+              amount: currentBet.amount,
+              win: true,
+              winAmount: winAmount
+            });
+          } else {
+            // Loss - already deducted coins when placing bet
+            showResultNotification(`Sorry, the result was ${actualValue}. You lost ${currentBet.amount} coins.`, false);
+            
+            // Add to bet history
+            betHistory.push({
+              type: currentBet.type,
+              value: currentBet.value,
+              amount: currentBet.amount,
+              win: false,
+              winAmount: 0
+            });
+          }
+          
+          updateBetHistory();
+        }
+        
+        // Reset bet
+        currentBet = null;
+        isBetPlaced = false;
+        updateCoinDisplay();
+        
+        // Start new betting timer
+        startBettingTimer();
+      }
+    }
+
+    // Add prediction entry if new period
+    if(period!=="Unavailable"){
+      if(!predictionHistory.find(p=>p.period===period)){
+        predictionHistory.unshift({period:period, prediction:"--", actual:"--", status:"Waiting", mode:mode});
+        if(predictionHistory.length>20) predictionHistory.pop();
+      }
+    }
+
+    // Update prediction history results
+    predictionHistory.forEach(ph=>{
+      const match=history.find(h=>h.period===ph.period);
+      if(match && ph.status==="Waiting"){
+        ph.actual= ph.mode==="size"?match.size:match.color;
+        ph.status="Analyzed";
+      }
+    });
+    renderTable();
+  }catch(e){
+    document.getElementById("predictionBox").innerText="Analysis Error";
+    console.error(e);
+  }
+}
+
+function renderTable(){
+  const head=document.getElementById("tableHead");
+  const body=document.getElementById("tableBody");
+  
+  head.innerHTML="<tr><th>Period</th><th>Number</th><th>Big/Small</th><th>Color</th></tr>";
+  body.innerHTML="";
+  
+  fetch(HISTORY_API+'?ts='+Date.now()).then(r=>r.json()).then(data=>{
+    const history=data.data.list.slice(0,10).map(item=>{
+      const num=parseInt(item.number);
+      return {period:item.issueNumber, number:num, size:getBigSmall(num), color:getColor(num)};
+    });
+    history.forEach(item=>{
+      const colorClass=item.color.toLowerCase();
+      body.innerHTML+=`
+        <tr>
+          <td>${item.period}</td>
+          <td class="num ${colorClass}">${item.number}</td>
+          <td>${item.size}</td>
+          <td><span class="dot ${colorClass}"></span></td>
+        </tr>`;
+    });
+  });
+}
+
+// Coin system functions
+function updateCoinDisplay() {
+  document.getElementById("coinBalance").textContent = coins;
+  document.getElementById("placeBetBtn").disabled = coins < 30 || isBetPlaced;
+  document.getElementById("placeBetBtn").textContent = isBetPlaced ? "Bet Placed - Waiting..." : "Place Bet (30 Coins)";
+}
+
+function placeBet() {
+  if (coins < 30) {
+    alert("Not enough coins to place a bet!");
+    return;
+  }
+  
+  coins -= 30;
+  isBetPlaced = true;
+  currentBet = {
+    type: "size",
+    value: currentPrediction ? currentPrediction.text : "Unknown",
+    amount: 30,
+    odds: 1.96
+  };
+  
+  updateCoinDisplay();
+  // Prediction box is now invisible
+  document.getElementById("predictionBox").innerText = "Analyzing Patterns...";
+  
+  // Force immediate data fetch to get prediction
+  fetchData();
+}
+
+// Purchase Widget Functions
+function showPurchaseWidget(type, value) {
+  selectedBetType = type;
+  selectedBetValue = value;
+  
+  // Update widget title based on selection
+  document.getElementById("widgetTitle").textContent = `Select ${value}`;
+  
+  // Show widget and overlay
+  document.getElementById("purchaseWidget").style.display = "flex";
+  document.getElementById("overlay").style.display = "block";
+}
+
+function hidePurchaseWidget() {
+  document.getElementById("purchaseWidget").style.display = "none";
+  document.getElementById("overlay").style.display = "none";
+}
+
+function initPurchaseWidget() {
+  const pricePills = document.getElementById('pricePills');
+  const qtyPills = document.getElementById('qtyPills');
+  const qtyEl = document.getElementById('qty');
+  const minus = document.getElementById('minus');
+  const plus = document.getElementById('plus');
+  const totalEl = document.getElementById('total');
+  const agree = document.getElementById('agree');
+  const confirmBtn = document.getElementById('confirm');
+  const cancelBtn = document.getElementById('cancel');
+  const overlay = document.getElementById('overlay');
+
+  let unitPrice = 1;
+  let quantity = 1;
+
+  function formatMoney(v){ return '৳' + v.toFixed(2); }
+  function updateTotal(){ totalEl.textContent = formatMoney(unitPrice * quantity); }
+  function setActive(container, target){
+    [...container.querySelectorAll('.widget-pill')].forEach(b=>b.classList.remove('active'));
+    target.classList.add('active');
+  }
+
+  // Price buttons
+  pricePills.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.widget-pill');
+    if(!btn) return;
+    unitPrice = Number(btn.dataset.price);
+    setActive(pricePills, btn);
+    updateTotal();
+  });
+
+  // Quantity preset buttons
+  qtyPills.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.widget-pill');
+    if(!btn) return;
+    quantity = Math.max(1, Number(btn.dataset.q));
+    qtyEl.textContent = quantity;
+    setActive(qtyPills, btn);
+    updateTotal();
+  });
+
+  // +/- controls
+  minus.addEventListener('click', ()=>{
+    quantity = Math.max(1, quantity - 1);
+    qtyEl.textContent = quantity;
+    [...qtyPills.querySelectorAll('.widget-pill')].forEach(b=>b.classList.remove('active'));
+    updateTotal();
+  });
+  plus.addEventListener('click', ()=>{
+    quantity = quantity + 1;
+    qtyEl.textContent = quantity;
+    [...qtyPills.querySelectorAll('.widget-pill')].forEach(b=>b.classList.remove('active'));
+    updateTotal();
+  });
+
+  // Agree checkbox enables/disables confirm button
+  function toggleConfirm(){ confirmBtn.disabled = !agree.checked; }
+  agree.addEventListener('change', toggleConfirm);
+  toggleConfirm();
+
+  // Cancel: reset to defaults and hide widget
+  cancelBtn.addEventListener('click', ()=>{
+    // reset price
+    unitPrice = 1; quantity = 1;
+    qtyEl.textContent = '1';
+    updateTotal();
+    // reset pills active states
+    setActive(pricePills, pricePills.querySelector('[data-price="1"]'));
+    setActive(qtyPills, qtyPills.querySelector('[data-q="1"]'));
+    // re-check agreement
+    agree.checked = true; toggleConfirm();
+    
+    hidePurchaseWidget();
+  });
+
+  // Overlay click to close widget
+  overlay.addEventListener('click', hidePurchaseWidget);
+
+  // Confirm click
+  confirmBtn.addEventListener('click', ()=>{
+    if(confirmBtn.disabled) return;
+    
+    const betAmount = unitPrice * quantity;
+    if (coins < betAmount) {
+      alert("Not enough coins to place this bet!");
+      return;
+    }
+    
+    // Deduct coins
+    coins -= betAmount;
+    
+    // Calculate odds
+    const odds = getOdds(selectedBetType, selectedBetValue);
+    
+    // Set current bet
+    currentBet = {
+      type: selectedBetType,
+      value: selectedBetValue,
+      amount: betAmount,
+      odds: odds
+    };
+    
+    isBetPlaced = true;
+    updateCoinDisplay();
+    
+    alert(`You placed a bet on: ${selectedBetType} = ${selectedBetValue}\nAmount: ${betAmount} coins, Odds: ${odds}x\nPotential win: ${Math.floor(betAmount * odds)} coins`);
+    hidePurchaseWidget();
+  });
+
+  updateTotal();
+}
+
+// Add event listeners to betting buttons
+function initBetButtons() {
+  const betButtons = document.querySelectorAll('.button-panel .btn');
+  betButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const type = btn.getAttribute('data-type');
+      const value = btn.getAttribute('data-value');
+      showPurchaseWidget(type, value);
+    });
+  });
+}
+
+// Initialize everything when page loads
+window.addEventListener('DOMContentLoaded', () => {
+  initPurchaseWidget();
+  initBetButtons();
+  updateCoinDisplay();
+  startBettingTimer();
+  
+  // Start the market timer
+  marketTimerInterval = setInterval(updateMarketTimer, 1000);
+  
+  // Add event listener for the bet button
+  document.getElementById("placeBetBtn").addEventListener("click", placeBet);
+});
+
+setInterval(fetchData,5000);
+fetchData();
+</script>
+</body>
+</html>
